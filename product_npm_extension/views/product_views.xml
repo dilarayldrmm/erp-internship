@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- ================= ANA ÜRÜNLER (PRODUCT.TEMPLATE) ================= -->
+        
+        <!-- 1. Form Görünümü -->
+        <record id="view_product_template_form_inherit_npm" model="ir.ui.view">
+            <field name="name">product.template.form.inherit.npm</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_only_form_view"/> 
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='default_code']" position="after">
+                    <!-- Varyant sayısını çek ve 1'den büyükse NPM alanını gizle -->
+                    <field name="product_variant_count" invisible="1"/>
+                    <field name="npm" invisible="product_variant_count &gt; 1"/>
+                </xpath>
+            </field>
+        </record>
+
+        <!-- 2. Liste (Tree) Görünümü -->
+        <record id="view_product_template_tree_inherit_npm" model="ir.ui.view">
+            <field name="name">product.template.tree.inherit.npm</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_tree_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='default_code']" position="after">
+                    <field name="product_variant_count" invisible="1"/>
+                    <field name="npm" invisible="product_variant_count &gt; 1" optional="show"/>
+                </xpath>
+            </field>
+        </record>
+
+        <!-- 3. Kanban Görünümü -->
+        <record id="view_product_template_kanban_inherit_npm" model="ir.ui.view">
+            <field name="name">product.template.kanban.inherit.npm</field>
+            <field name="model">product.template</field>
+            <field name="inherit_id" ref="product.product_template_kanban_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='default_code']" position="after">
+                    <field name="product_variant_count" invisible="1"/>
+                    <field name="npm" invisible="1"/>
+                    <!-- Sadece NPM değeri varsa ve varyant sayısı 1'den fazla değilse göster -->
+                    <div t-if="record.npm.raw_value" invisible="product_variant_count &gt; 1" class="mt-1 text-muted">
+                        <strong>NPM: </strong> <field name="npm"/>
+                    </div>
+                </xpath>
+            </field>
+        </record>
+
+        <!-- ================= ÜRÜN VARYANTLARI (PRODUCT.PRODUCT) ================= -->
+
+        <!-- 4. Form Görünümü -->
+        <record id="view_product_product_form_inherit_npm" model="ir.ui.view">
+            <field name="name">product.product.form.inherit.npm</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="product.product_normal_form_view"/> 
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='default_code']" position="after">
+                    <field name="npm"/>
+                </xpath>
+            </field>
+        </record>
+
+        <!-- 5. Liste (Tree) Görünümü -->
+        <record id="view_product_product_tree_inherit_npm" model="ir.ui.view">
+            <field name="name">product.product.tree.inherit.npm</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="product.product_product_tree_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='default_code']" position="after">
+                    <field name="npm" optional="show"/>
+                </xpath>
+            </field>
+        </record>
+
+        <!-- 6. Kanban Görünümü -->
+        <record id="view_product_product_kanban_inherit_npm" model="ir.ui.view">
+            <field name="name">product.product.kanban.inherit.npm</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="product.product_kanban_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='name']" position="after">
+                    <field name="npm" invisible="1"/>
+                    <div class="mt-1 text-muted">
+                        <strong>NPM: </strong> <field name="npm"/>
+                    </div>
+                </xpath>
+            </field>
+        </record>
+
+     <!-- 7. Arama (Search) ve Group By Görünümü (Varyantlar İçin) -->
+        <record id="view_product_product_search_inherit_npm" model="ir.ui.view">
+            <field name="name">product.product.search.inherit.npm</field>
+            <field name="model">product.product</field>
+            <field name="inherit_id" ref="product.product_search_form_view"/>
+            <field name="arch" type="xml">
+                <!-- Odoo'nun varsayılan arama filtresinin içine NPM'i de dahil ediyoruz -->
+                <xpath expr="//field[@name='name']" position="attributes">
+                    <attribute name="filter_domain">['|', '|','|', ('name', 'ilike', self), ('default_code', 'ilike', self), ('npm', 'ilike', self),('barcode', 'ilike', self)] </attribute>
+                </xpath>
+
+                <!-- Group By menüsünün altına NPM'e göre gruplama ekliyoruz -->
+                <xpath expr="//search/group" position="inside">
+                    <filter string="NPM" name="groupby_npm" domain="[]" context="{'group_by': 'npm'}"/>
+                </xpath>
+            </field>
+        </record>
+        
+    </data>
+</odoo>
